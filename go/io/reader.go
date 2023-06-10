@@ -21,6 +21,7 @@ func NewLineReader(filename string) (*LineReader, error) {
 	}
 
 	scanner := bufio.NewScanner(file)
+	scanner.Buffer(make([]byte, 64*1024), 1024*1024)
 	return &LineReader{file: file, scanner: scanner}, nil
 }
 
@@ -57,10 +58,17 @@ func (l *LineReader) ReadIntSlice() ([]int, error) {
 	if err != nil {
 		return nil, err
 	}
-	line = strings.TrimSpace(line)
-	line = strings.TrimPrefix(line, "[")
-	line = strings.TrimSuffix(line, "]")
-	elements := strings.Split(line, ",")
+	return l.parseIntSlice(line)
+}
+
+func (l *LineReader) parseIntSlice(s string) ([]int, error) {
+	s = strings.TrimSpace(s)
+	s = strings.TrimPrefix(s, "[")
+	s = strings.TrimSuffix(s, "]")
+	if len(s) == 0 {
+		return nil, nil
+	}
+	elements := strings.Split(s, ",")
 	result := make([]int, len(elements))
 	for i, e := range elements {
 		e = strings.TrimSpace(e)
@@ -73,6 +81,29 @@ func (l *LineReader) ReadIntSlice() ([]int, error) {
 	return result, nil
 }
 
+func (l *LineReader) Read2DimIntSlice() ([][]int, error) {
+	line, err := l.ReadLine()
+	if err != nil {
+		return nil, err
+	}
+	line = strings.TrimSpace(line)
+	line = strings.TrimPrefix(line, "[")
+	line = strings.TrimSuffix(line, "]")
+	if len(line) == 0 {
+		return nil, nil
+	}
+	elements := strings.Split(line, "],")
+	result := make([][]int, len(elements))
+	for i, e := range elements {
+		x, err := l.parseIntSlice(e)
+		if err != nil {
+			return nil, err
+		}
+		result[i] = x
+	}
+	return result, nil
+}
+
 func (l *LineReader) ReadStringSlice() ([]string, error) {
 	line, err := l.ReadLine()
 	if err != nil {
@@ -81,6 +112,9 @@ func (l *LineReader) ReadStringSlice() ([]string, error) {
 	line = strings.TrimSpace(line)
 	line = strings.TrimPrefix(line, "[")
 	line = strings.TrimSuffix(line, "]")
+	if len(line) == 0 {
+		return nil, nil
+	}
 	elements := strings.Split(line, ",")
 	result := make([]string, len(elements))
 	for i, e := range elements {

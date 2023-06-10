@@ -61,13 +61,14 @@ func (kvh *KeyValueHeap[K, V]) Pop() (K, V, bool) {
 	if kvh.size == 1 {
 		kvh.h = nil
 		kvh.size = 0
+		delete(kvh.keyToIndex, min.key)
 	} else {
 		kvh.swap(0, kvh.size-1)
 		kvh.size -= 1
 		kvh.h = kvh.h[0:kvh.size]
+		delete(kvh.keyToIndex, min.key)
 		kvh.siftDown(0)
 	}
-	delete(kvh.keyToIndex, min.key)
 
 	return min.key, min.value, true
 }
@@ -85,7 +86,7 @@ func (kvh *KeyValueHeap[K, V]) siftDown(i int) {
 		if 2*i+2 < kvh.size && kvh.less(2*i+2, 2*i+1) {
 			minChild = 2*i + 2
 		}
-		if kvh.less(i, minChild) {
+		if kvh.less(minChild, i) {
 			kvh.swap(i, minChild)
 			i = minChild
 		} else {
