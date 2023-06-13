@@ -73,6 +73,29 @@ func (kvh *KeyValueHeap[K, V]) Pop() (K, V, bool) {
 	return min.key, min.value, true
 }
 
+func (kvh *KeyValueHeap[K, V]) RemoveKey(k K) {
+	i, ok := kvh.keyToIndex[k]
+	if !ok {
+		return
+	}
+
+	if kvh.size == 1 {
+		kvh.size = 0
+		kvh.h = nil
+		delete(kvh.keyToIndex, k)
+	} else if i == kvh.size-1 {
+		kvh.size -= 1
+		kvh.h = kvh.h[0:kvh.size]
+		delete(kvh.keyToIndex, k)
+	} else {
+		kvh.swap(i, kvh.size-1)
+		kvh.size -= 1
+		kvh.h = kvh.h[0:kvh.size]
+		delete(kvh.keyToIndex, k)
+		kvh.siftDown(i)
+	}
+}
+
 func (kvh *KeyValueHeap[K, V]) swap(i, j int) {
 	a, b := kvh.h[i], kvh.h[j]
 	kvh.h[i], kvh.h[j] = b, a
