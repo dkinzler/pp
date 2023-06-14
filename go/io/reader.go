@@ -21,7 +21,7 @@ func NewLineReader(filename string) (*LineReader, error) {
 	}
 
 	scanner := bufio.NewScanner(file)
-	scanner.Buffer(make([]byte, 64*1024), 1024*1024)
+	scanner.Buffer(make([]byte, 64*1024), 10*1024*1024)
 	return &LineReader{file: file, scanner: scanner}, nil
 }
 

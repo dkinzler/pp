@@ -93,6 +93,7 @@ func (kvh *KeyValueHeap[K, V]) RemoveKey(k K) {
 		kvh.h = kvh.h[0:kvh.size]
 		delete(kvh.keyToIndex, k)
 		kvh.siftDown(i)
+		kvh.siftUp(i)
 	}
 }
 
